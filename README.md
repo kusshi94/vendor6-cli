@@ -3,7 +3,21 @@ An Interactive CLI tool to identify vendors by IPv6 address
 
 ## Installation
 
-Download the latest release from the [releases page](https://github.com/kusshi94/vendor6-cli/releases)
+### go install
+
+```
+go install github.com/kusshi94/vendor6-cli@latest
+```
+
+### Homebrew
+
+```
+brew install kusshi94/tap/vendor6-cli
+```
+
+### Manual
+
+Download the latest release from the [releases page](https://github.com/kusshi94/vendor6-cli/releases) and extract the archive file.
 
 ## Usage
 

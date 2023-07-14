@@ -43,3 +43,8 @@ changelog:
 # Feel free to remove those if you don't want/use them.
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
+brews:
+  - tap:
+    owner: kusshi94
+    name: homebrew-tap
+    token: ${{ .Env.TAP_TOKEN }}
