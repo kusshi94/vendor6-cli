@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -21,19 +20,6 @@ const (
 	OUI_LIST_URL = "https://standards-oui.ieee.org/oui/oui.txt"
 )
 
-var OUIFILEPATH = "./oui.txt"
-
-func init() {
-	// oui.txtがなければダウンロード
-	_, err := os.Stat(OUIFILEPATH)
-	if os.IsNotExist(err) {
-		err = fetchAndSaveOuiList()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-}
-
 type OUI struct {
 	Code    string
 	Company string
@@ -44,67 +30,74 @@ type OUIDb struct {
 	ouimp map[string]OUI
 }
 
-func getOuiList() (io.Reader, error) {
+// oui.txtを開く
+func openOuiTxt(ouiFilePath string) (io.ReadCloser, error) {
 	var err error
-	if _, err = os.Stat(OUIFILEPATH); !os.IsNotExist(err) {
-		f, err := os.Open(OUIFILEPATH)
+	// oui.txtがなければダウンロードする
+	if _, err = os.Stat(ouiFilePath); os.IsNotExist(err) {
+		err := fetchAndSaveOuiTxt(ouiFilePath)
 		if err != nil {
 			return nil, err
 		}
-		return f, nil
 	}
-	return nil, err
-}
-
-func fetchOuiList() (io.ReadCloser, error) {
-	resp, err := http.Get(OUI_LIST_URL)
+	// oui.txtを開く
+	f, err := os.Open(ouiFilePath)
 	if err != nil {
 		return nil, err
 	}
-	return resp.Body, nil
+	return f, nil
 }
 
-func fetchAndSaveOuiList() error {
+// oui.txtをダウンロードして保存
+func fetchAndSaveOuiTxt(ouiFilePath string) error {
+	// UI表示
 	fmt.Println("Downloading oui.txt...")
 	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	s.Start()
-	rb, err := fetchOuiList()
+
+	// oui.txtをダウンロード
+	resp, err := http.Get(OUI_LIST_URL)
 	if err != nil {
 		return err
 	}
-	err = os.MkdirAll(filepath.Dir(OUIFILEPATH), os.ModePerm)
+	defer resp.Body.Close()
+
+	// 保存
+	// ディレクトリがなければ作成
+	err = os.MkdirAll(filepath.Dir(ouiFilePath), os.ModePerm)
 	if err != nil {
 		return err
 	}
-	file, err := os.Create(OUIFILEPATH)
+	// ファイル作成
+	file, err := os.Create(ouiFilePath)
 	if err != nil {
 		return err
 	}
-	_, err = io.Copy(file, rb)
+	// ファイルへのデータ書き込み
+	_, err = io.Copy(file, resp.Body)
 	if err != nil {
 		return err
 	}
+
 	s.Stop()
+
 	return nil
 }
 
-func NewOUIDb() (*OUIDb, error) {
+// OUIDbを作成
+func NewOUIDb(ouiFilePath string) (*OUIDb, error) {
 	db := OUIDb{
 		ouimp: make(map[string]OUI),
 	}
 
-	r, err := getOuiList()
-	if os.IsNotExist(err) {
-		err = fetchAndSaveOuiList()
-		if err != nil {
-			return nil, err
-		}
-		r, err = getOuiList()
-		if err != nil {
-			return nil, err
-		}
+	// oui.txtを開く
+	r, err := openOuiTxt(ouiFilePath)
+	if err != nil {
+		return nil, err
 	}
+	defer r.Close()
 
+	// データを読み込む
 	pat_hex := regexp.MustCompile(`^([0-9A-F][0-9A-F]-[0-9A-F][0-9A-F]-[0-9A-F][0-9A-F]) +\(hex\)\t\t(.*)$`)
 	pat_base16 := regexp.MustCompile(`^([0-9A-F]{6})     \(base 16\)\t\t(.*)$`)
 	pat_country := regexp.MustCompile(`^\t\t\t\t[A-Z][A-Z]$`)
@@ -139,6 +132,7 @@ func NewOUIDb() (*OUIDb, error) {
 	return &db, nil
 }
 
+// MACアドレスからOUIを検索
 func (db *OUIDb) Lookup(mac net.HardwareAddr) *OUI {
 	ret, ok := db.ouimp[strings.ReplaceAll(mac.String(), ":", "")[:6]]
 	if !ok {

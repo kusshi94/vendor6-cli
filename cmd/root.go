@@ -11,21 +11,36 @@ import (
 
 // フラグ引数用変数
 var rootOpts = struct {
-	downloadOuiTxt bool
+	ouiFilePath string
 }{}
 
 // コマンド
 var rootCmd = &cobra.Command{
 	Use:   "vendor6-cli",
 	Short: "Start vendor6-cli",
-	Long:  `Start vendor6-cli, an Interactive CLI tool to identify vendors by IPv6 address`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
+	Long:  `Start vendor6-cli, an Interactive CLI tool to identify vendors by IPv6 address
+Interactively entering an IPv6 address returns the vendor name for that address.
+You can exit by typing "exit"
+OUI information is downloaded from https://standards-oui.ieee.org/oui/oui.txt
 
+IPv6アドレスを入力すると、そのアドレスのベンダー名を返します。
+"exit"と入力すると終了します。
+OUI情報は https://standards-oui.ieee.org/oui/oui.txt からダウンロードされます。
+`,
+	Example: `$ vendor6-cli
+>: 2001:db8::0a00:7ff:fe12:3456
+Apple, Inc.
+>: 2001:db8::6666:b3ff:fe11:1111
+TP-LINK TECHNOLOGIES CO.,LTD.
+>: exit
+$
+`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// DB初期化
-		db, err := infra.NewOUIDb()
+		db, err := infra.NewOUIDb(rootOpts.ouiFilePath)
 		if err != nil {
 			return err
 		}
@@ -63,13 +78,5 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.vendor6-cli.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.Flags().StringVarP(&rootOpts.ouiFilePath, "oui-file", "f", "./oui.txt", "OUI file path")
 }
