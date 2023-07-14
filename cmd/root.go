@@ -50,6 +50,9 @@ $
 			Validate: func(s string) error { return nil },
 		}
 
+		// welcome message
+		fmt.Println("Enter an IPv6 address to get the vendor name. If you want to exit, type \"exit\".")
+
 		// メインループ
 		for {
 			// データ入力
