@@ -55,7 +55,7 @@ $
 				result, err := ipToVendor(arg, db, rootOpts.printAllInfo)
 				if err != nil {
 					if !rootOpts.silent {
-						fmt.Print(err.Error())
+						fmt.Println(err.Error())
 					}
 				} else {
 					fmt.Println(result)
@@ -92,7 +92,7 @@ $
 			result, err := ipToVendor(input, db, rootOpts.printAllInfo)
 			if err != nil {
 				if !rootOpts.silent {
-					fmt.Print(err.Error())
+					fmt.Println(err.Error())
 				}
 			} else {
 				fmt.Println(result)
