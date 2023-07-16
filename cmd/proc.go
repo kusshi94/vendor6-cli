@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"net/netip"
@@ -9,16 +10,16 @@ import (
 )
 
 // ipToVendor returns the vendor name for the given IPv6 address.
-func ipToVendor(userInput string, db *infra.OUIDb, printAllInfo bool) string {
+func ipToVendor(userInput string, db *infra.OUIDb, printAllInfo bool) (string, error) {
 	// Parse user input as IPv6 address
 	nip, err := netip.ParseAddr(userInput)
 	if err != nil {
-		return fmt.Sprintf("%s is not Valid IPv6 Address", userInput)
+		return "", fmt.Errorf("%s is not Valid IPv6 Address", userInput)
 	}
 
 	// Chek if the address is IPv6
 	if !nip.Is6() {
-		return fmt.Sprintf("%s is not IPv6 Adress", nip.String())
+		return "", fmt.Errorf("%s is not IPv6 Adress", nip.String())
 	}
 
 	// Get IID from IPv6 address
@@ -26,7 +27,7 @@ func ipToVendor(userInput string, db *infra.OUIDb, printAllInfo bool) string {
 
 	// Check if IID is EUI-64
 	if !iid.isEUI64() {
-		return fmt.Sprintf("%s is not EUI-64 Address", userInput)
+		return "", fmt.Errorf("%s is not EUI-64 Address", userInput)
 	}
 
 	// Get MAC address from IID
@@ -37,11 +38,11 @@ func ipToVendor(userInput string, db *infra.OUIDb, printAllInfo bool) string {
 	// Return vendor name
 	if oui != nil {
 		if printAllInfo {
-			return oui.String()
+			return oui.String(), nil
 		}
-		return oui.Company
+		return oui.Company, nil
 	}
-	return "OUI Not Found"
+	return "", errors.New("OUI Not Found")
 }
 
 type IID [8]byte

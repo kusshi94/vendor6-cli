@@ -11,15 +11,16 @@ import (
 
 // variables for command line options
 var rootOpts = struct {
-	ouiFilePath string
+	ouiFilePath  string
 	printAllInfo bool
+	silent       bool
 }{}
 
 // main command
 var rootCmd = &cobra.Command{
 	Use:   "vendor6-cli [IPv6 address...]",
 	Short: "Start vendor6-cli",
-	Long:  `Start vendor6-cli, an Interactive CLI tool to identify vendors by IPv6 address
+	Long: `Start vendor6-cli, an Interactive CLI tool to identify vendors by IPv6 address
 
 If IPv6 address is given as arguments, the vendor name for that address is returned.
 
@@ -51,7 +52,14 @@ $
 		// If arguments are given, process them and exit
 		if len(args) > 0 {
 			for _, arg := range args {
-				fmt.Println(ipToVendor(arg, db, rootOpts.printAllInfo))
+				result, err := ipToVendor(arg, db, rootOpts.printAllInfo)
+				if err != nil {
+					if !rootOpts.silent {
+						fmt.Print(err.Error())
+					}
+				} else {
+					fmt.Println(result)
+				}
 			}
 			return nil
 		}
@@ -81,7 +89,14 @@ $
 			}
 
 			// Print vendor name
-			fmt.Println(ipToVendor(input, db, rootOpts.printAllInfo))
+			result, err := ipToVendor(input, db, rootOpts.printAllInfo)
+			if err != nil {
+				if !rootOpts.silent {
+					fmt.Print(err.Error())
+				}
+			} else {
+				fmt.Println(result)
+			}
 		}
 
 	},
@@ -97,4 +112,5 @@ func Execute() {
 func init() {
 	rootCmd.Flags().StringVarP(&rootOpts.ouiFilePath, "oui-file", "f", "./oui.txt", "OUI file path")
 	rootCmd.Flags().BoolVarP(&rootOpts.printAllInfo, "all", "a", false, "Print all information of OUI")
+	rootCmd.Flags().BoolVarP(&rootOpts.silent, "silent", "s", false, "Silent mode: do not print error messages")
 }
