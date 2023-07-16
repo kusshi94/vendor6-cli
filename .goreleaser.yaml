@@ -44,6 +44,9 @@ changelog:
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
 brews:
+  - homepage: "https://github.com/kusshi94/vendor6-cli"
+  - description: "An Interactive CLI tool to identify vendors by IPv6 address"
+  - license: "MIT"
   - repository:
       owner: kusshi94
       name: homebrew-tap
