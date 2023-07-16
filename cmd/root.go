@@ -9,24 +9,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// フラグ引数用変数
+// variables for command line options
 var rootOpts = struct {
 	ouiFilePath string
 }{}
 
-// コマンド
+// main command
 var rootCmd = &cobra.Command{
-	Use:   "vendor6-cli",
+	Use:   "vendor6-cli [IPv6 address...]",
 	Short: "Start vendor6-cli",
 	Long:  `Start vendor6-cli, an Interactive CLI tool to identify vendors by IPv6 address
-Interactively entering an IPv6 address returns the vendor name for that address.
-You can exit by typing "exit"
-OUI information is downloaded from https://standards-oui.ieee.org/oui/oui.txt
 
-IPv6アドレスを入力すると、そのアドレスのベンダー名を返します。
-"exit"と入力すると終了します。
-OUI情報は https://standards-oui.ieee.org/oui/oui.txt からダウンロードされます。
-`,
+If IPv6 address is given as arguments, the vendor name for that address is returned.
+
+If no arguments are given, the interactive mode is started.
+In interactive mode, enter an IPv6 address to get the vendor name.
+If you want to exit interactive mode, type "exit".
+
+OUI information is automatically downloaded from https://standards-oui.ieee.org/oui/oui.txt to the current directory.
+If you want to use a different file, use the -f option to specify the file path.`,
+	DisableFlagsInUseLine: true,
 	Example: `$ vendor6-cli
 >: 2001:db8::0a00:7ff:fe12:3456
 Apple, Inc.
@@ -39,34 +41,45 @@ $
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// DB初期化
+		// Initialize OUI database
 		db, err := infra.NewOUIDb(rootOpts.ouiFilePath)
 		if err != nil {
 			return err
 		}
 
+		// If arguments are given, process them and exit
+		if len(args) > 0 {
+			for _, arg := range args {
+				fmt.Println(ipToVendor(arg, db))
+			}
+			return nil
+		}
+
+		// -- Interactive mode --
+
+		// Initialize prompt
 		prompt := promptui.Prompt{
 			Label:    ">",
 			Validate: func(s string) error { return nil },
 		}
 
-		// welcome message
+		// Print usage message
 		fmt.Println("Enter an IPv6 address to get the vendor name. If you want to exit, type \"exit\".")
 
-		// メインループ
+		// Start interactive mode
 		for {
-			// データ入力
+			// Get input from user interactively
 			input, err := prompt.Run()
 			if err != nil {
 				return err
 			}
 
-			// 終了
+			// Exit if input is "exit"
 			if input == "exit" {
 				return nil
 			}
 
-			// 入力を処理
+			// Print vendor name
 			fmt.Println(ipToVendor(input, db))
 		}
 

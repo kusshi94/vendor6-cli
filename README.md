@@ -21,6 +21,21 @@ Download the latest release from the [releases page](https://github.com/kusshi94
 
 ## Usage
 
+### Command Line Mode
+
+```
+vendor6-cli <IPv6 address> [-f|--oui-file <file path>]
+```
+
+#### Example
+
+```
+$ vendor6-cli 2001:db8::0a00:7ff:fe12:3456
+Apple, Inc.
+```
+
+### Interactive Mode
+
 Launch the tool with the following command:
 
 ```
@@ -32,10 +47,11 @@ If you want to exit the tool, type `exit`.
 
 oui.txt file is automatically downloaded from [IEEE](https://standards-oui.ieee.org/oui/oui.txt) to run the tool. If you want to use your own file, use `-f` / `--oui-file` option.
 
-### Example
+#### Example
 
 ```
 $ vendor6-cli
+Enter an IPv6 address to get the vendor name. If you want to exit, type "exit".
 >: 2001:db8::0a00:7ff:fe12:3456
 Apple, Inc.
 >: 2001:db8::6666:b3ff:fe11:1111
