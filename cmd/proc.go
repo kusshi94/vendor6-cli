@@ -9,7 +9,7 @@ import (
 )
 
 // ipToVendor returns the vendor name for the given IPv6 address.
-func ipToVendor(userInput string, db *infra.OUIDb) string {
+func ipToVendor(userInput string, db *infra.OUIDb, printAllInfo bool) string {
 	// Parse user input as IPv6 address
 	nip, err := netip.ParseAddr(userInput)
 	if err != nil {
@@ -36,6 +36,9 @@ func ipToVendor(userInput string, db *infra.OUIDb) string {
 	oui := db.Lookup(mac)
 	// Return vendor name
 	if oui != nil {
+		if printAllInfo {
+			return oui.String()
+		}
 		return oui.Company
 	}
 	return "OUI Not Found"

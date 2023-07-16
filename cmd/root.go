@@ -12,6 +12,7 @@ import (
 // variables for command line options
 var rootOpts = struct {
 	ouiFilePath string
+	printAllInfo bool
 }{}
 
 // main command
@@ -50,7 +51,7 @@ $
 		// If arguments are given, process them and exit
 		if len(args) > 0 {
 			for _, arg := range args {
-				fmt.Println(ipToVendor(arg, db))
+				fmt.Println(ipToVendor(arg, db, rootOpts.printAllInfo))
 			}
 			return nil
 		}
@@ -80,7 +81,7 @@ $
 			}
 
 			// Print vendor name
-			fmt.Println(ipToVendor(input, db))
+			fmt.Println(ipToVendor(input, db, rootOpts.printAllInfo))
 		}
 
 	},
@@ -95,4 +96,5 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().StringVarP(&rootOpts.ouiFilePath, "oui-file", "f", "./oui.txt", "OUI file path")
+	rootCmd.Flags().BoolVarP(&rootOpts.printAllInfo, "all", "a", false, "Print all information of OUI")
 }
