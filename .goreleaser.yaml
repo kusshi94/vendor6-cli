@@ -39,3 +39,4 @@ brews:
     repository:
       owner: kusshi94
       name: homebrew-tap
+      token: "{{ .Env.TAP_TOKEN }}"

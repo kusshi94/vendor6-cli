@@ -34,4 +34,5 @@ jobs:
                 version: latest
                 args: release --clean
               env:
-                GITHUB_TOKEN: ${{ secrets.create-token.outputs.token }}
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                TAP_TOKEN: ${{ steps.create-token.outputs.token }}
