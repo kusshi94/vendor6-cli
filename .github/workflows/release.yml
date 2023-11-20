@@ -21,6 +21,12 @@ jobs:
               uses: actions/setup-go@v4
               with:
                 go-version-file: go.mod
+            - name: Create App Token
+              uses: actions/create-github-app-token@v1
+              id: create-token
+              with:
+                app_id: ${{ secrets.APP_ID }}
+                private_key: ${{ secrets.PRIVATE_KEY }}
             - name: Run GoReleaser
               uses: goreleaser/goreleaser-action@v4
               with:
@@ -28,5 +34,4 @@ jobs:
                 version: latest
                 args: release --clean
               env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                TAP_TOKEN: ${{ secrets.TAP_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.create-token.outputs.token }}
