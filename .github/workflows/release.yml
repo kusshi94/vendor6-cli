@@ -14,7 +14,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
               with:
                   fetch-depth: 0
             - name: Setup Go
@@ -22,13 +22,11 @@ jobs:
               with:
                 go-version-file: go.mod
             - name: Create App Token
-              uses: actions/create-github-app-token@v1
+              uses: tibdex/github-app-token@v2
               id: create-token
               with:
-                app-id: ${{ secrets.APP_ID }}
-                private-key: ${{ secrets.PRIVATE_KEY }}
-              env:
-                OPENSSL_CONF: /dev/null
+                app_id: ${{ secrets.APP_ID }}
+                private_key: ${{ secrets.PRIVATE_KEY }}
             - name: Run GoReleaser
               uses: goreleaser/goreleaser-action@v4
               with:
