@@ -27,6 +27,8 @@ jobs:
               with:
                 app-id: ${{ secrets.APP_ID }}
                 private-key: ${{ secrets.PRIVATE_KEY }}
+              env:
+                OPENSSL_CONF: /dev/null
             - name: Run GoReleaser
               uses: goreleaser/goreleaser-action@v4
               with:
